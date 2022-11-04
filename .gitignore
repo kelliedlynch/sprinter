@@ -21,3 +21,8 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Project development files
+*.sublime-project
+*.sublime-workspace
+/venv
