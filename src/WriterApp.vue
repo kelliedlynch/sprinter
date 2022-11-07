@@ -15,6 +15,7 @@
           :wordsWritten="wordsWritten"
           v-model:sprintTimeInSeconds="sprintTimeInSeconds"
           :timeElapsed="timeElapsed"
+          @timeChanged="onTimeChanged"
         />
 
 
@@ -37,22 +38,39 @@
   const wordCountGoal = ref(500)
   const wordsWritten = ref(0)
   const writerText = ref("")
-  const sprintTimeInSeconds = ref(60)
+  const sprintTimeInSeconds = ref(60*15)
   const timeElapsed = ref(0)
 
-  watch(writerText, textChanged)
+  watch(writerText, writerTextChanged)
+  watch(wordCountGoal, wordCountGoalChanged)
+  // watch(sprintTimeInSeconds, sprintTimeInSecondsChanged)
 
-  setInterval(timerDidTick, 1000)
+  // // setInterval(timerDidTick, 1000)
 
-  function timerDidTick() {
-    timeElapsed.value++
-  }
+  // // function timerDidTick() {
+  // //   timeElapsed.value++
+  // // }
 
-  function textChanged() {
-    const currentWordCount = writerText.value.split(" ").length - 1
+  function writerTextChanged(text) {
+    const currentWordCount = text.split(" ").length - 1
+    console.log("text changed", text)
     if(currentWordCount !== wordsWritten) {
       wordsWritten.value = currentWordCount
     }
+  }
+
+  function onTimeChanged(newValue) {
+    console.log("time changed", newValue)
+    sprintTimeInSeconds.value = newValue
+  }
+
+  // function sprintTimeInSecondsChanged(newValue) {
+  //   console.log("new value", newValue)
+  // }
+
+  function wordCountGoalChanged(newValue) {
+    // wordCountGoal.value = newValue
+    console.log("new value", newValue)
   }
 
 
