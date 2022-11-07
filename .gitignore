@@ -26,3 +26,4 @@ pnpm-debug.log*
 *.sublime-project
 *.sublime-workspace
 /venv
+yarn.lock

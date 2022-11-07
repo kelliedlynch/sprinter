@@ -1,61 +1,44 @@
 <template>
-  <q-page class="column full-height" >
-    <div 
-      class="q-pa-md" 
-      ref="writerTextArea"
-      v-bind:style="{height: editorWindowHeight + 'px'}"
-    >
-      <q-input
-        v-model="writerText"
-        filled
-        type="textarea"
-        class="writerTextArea"        
-      />
-      <!-- {{editorWindowHeight}} -->
-    </div>
-    </q-page>
+  <v-textarea
+    no-resize 
+    variant="solo"
+    @keyup="$emit('update:writerText', $event.target.value)"
+    v-writer-text-area
+    class="writerTextArea pa-4 pa-md-6 pa-lg-10" 
+    
+  >
+  </v-textarea>
 </template>
 
-<script>
-import { ref } from 'vue';
-import { dom } from 'quasar';
-// import { text } from 'body-parser';
-const { offset } = dom;
+<script setup>
+import { defineProps } from 'vue';
 
-export default {
-  props: ['wordCountGoal'],
-  setup() {
-    const editorWindowHeight = ref(0);
-    console.log("set to 0", editorWindowHeight.value)
-    return {
-      editorWindowHeight
-    }
+const props = defineProps({
+  writerText: {
+    type: String,
+    default: "",
+    required: true
   },
-  mounted() {
-    const textAreaOffset = offset(this.$refs.writerTextArea).top;
-    
-    this.editorWindowHeight = window.innerHeight - textAreaOffset
-    console.log("set to value", this.editorWindowHeight)
-  },
-  beforeUpdate() {
-    console.log("beforeUpdate")
-  },
-  data() {
-    return {
-      writerText: ref(""),
-      editorWindowStyle: {
-        height: this.editorWindowHeight + "px"
-      },
-    }
-  },
-  computed: {
-    currentWordCount() {
-      return this.writerText.split(" ");
-    },
-    wordsRemaining() {
-      return this.wordCountGoal - this.currentWordCount;
-    }
-  }
+})
+
+
+// const writerText = ref("")
+// const wordsWritten = ref(0)
+
+// function fireEvent() = {
+//   this.$emit("updateWordsWritten", wordsWritten, props.wordsWritten)
+// }
+
+const vWriterTextArea = {
 
 }
+// setInterval(timerDidTick, 1000)
+
+// const vWriterTextArea = {
+//   updated: () => {
+//     console.log(currentWordCount())
+//     console.log(wordsRemaining())
+//   }
+// }
+
 </script>
