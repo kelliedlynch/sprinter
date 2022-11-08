@@ -2,30 +2,36 @@
   <v-textarea
     no-resize 
     variant="solo"
-    @keyup="textDidChange"
-    class="writerTextArea pa-4 pa-md-6 pa-lg-10" 
+    :class="[
+      'writerTextArea',
+      'pa-4', 'pa-md-6', 'pa-lg-10',
+      props.sprintIsPunishing ? 'writerPunishing' : '']" 
     placeholder="Start writing, or use the left menu to change your sprint options."
+    :value="textAreaContent"
+    @input="didEnterKeystroke"
+    transition="fade-transition"
   >
   </v-textarea>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { ref, defineEmits, defineProps } from 'vue';
 
 const props = defineProps({
   sprintIsRunning: Boolean,
-  onBeginSprint: Function,
-  onWriterTextChanged: Function,
+  sprintIsPunishing: Boolean,
 })
 
-const emit = defineEmits([])
+const textAreaContent = ref("")
 
-function textDidChange(event) {
-  console.log(event.target.value)
+const emit = defineEmits([
+  "writerTextChanged",
+])
+
+function didEnterKeystroke(event) {
+
+  textAreaContent.value = event.target.value
   emit('writerTextChanged', event.target.value)
-  if(!props.sprintIsRunning) {
-    emit("beginSprint")
-  }
 }
 
 </script>

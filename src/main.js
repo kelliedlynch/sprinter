@@ -1,10 +1,8 @@
 import { createApp } from 'vue'
 import WriterApp from './WriterApp.vue'
-// import { Quasar } from 'quasar'
-// import quasarUserOptions from './quasar-user-options'
 
 import 'vuetify/styles'
-import "./styles/sprinter.sass"
+import "./styles/sprinter.scss"
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -25,5 +23,3 @@ const vuetify = createVuetify({
   })
   
   createApp(WriterApp).use(vuetify).mount('#app')
-
-// createApp(WriterApp).use(Quasar, quasarUserOptions).mount('#app')

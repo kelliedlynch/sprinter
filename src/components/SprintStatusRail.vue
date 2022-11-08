@@ -3,15 +3,7 @@
   <v-card
     class="my-2 brandingCard"
   >
-
-    <!-- <v-img
-      src="/sprinter-logo.svg"
-      :width="meterSize"
-      :height="meterSize"
-      
-    /> -->
-    <v-card-text
-    >
+    <v-card-text>
       <SprinterLogoTrimmed 
         :width="logoSize"
         :height="logoSize"
@@ -35,7 +27,10 @@
           :size="meterSize"
           :width="meterStroke"
         >
-        {{ wordsRemaining }}
+          <div class="d-flex flex-column align-center">
+            <div class="wordsMeterNumber">{{ wordsRemaining }}</div>
+            <div class="wordsMeterLabel">Words Left</div>
+          </div>
         </v-progress-circular>
       </div>
       <div class="w-100">
@@ -82,7 +77,10 @@
           :size="meterSize"
           :width="meterStroke"
         >
-          {{ timerString }}
+          <div class="d-flex flex-column align-center">
+            <div class="wordsMeterNumber">{{ timerString }}</div>
+            <div class="wordsMeterLabel">Remaining</div>
+          </div>
         </v-progress-circular>
       </div>
     
@@ -138,7 +136,6 @@
 </template>
 
 <script setup>
-// import { watch } from 'fs';
 import { defineProps, computed, defineEmits } from 'vue'
 
 import SprinterLogoTrimmed from "../assets/SprinterLogoTrimmed.vue"
@@ -155,15 +152,15 @@ const props = defineProps({
   timeElapsed: Number,
   sprintIsRunning: Boolean,
   sprintIsPaused: Boolean,
-  onBeginSprint: Function,
-  onEndSprint: Function,
-  onPauseSprint: Function,
-  onUnpauseSprint: Function,
 })
 
 const emit = defineEmits([
-  "timeChanged", 
-  "goalChanged", 
+  "beginSprint",
+  "endSprint",
+  "pauseSprint",
+  "unPauseSprint",
+  "timeChanged",
+  "goalChanged",
 ])
 
 const wordsGoal = computed({ 

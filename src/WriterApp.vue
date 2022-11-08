@@ -34,6 +34,7 @@
         @writerTextChanged="writerTextChanged"
         :sprintIsRunning="sprintIsRunning"
         @beginSprint="beginSprint"
+        :sprintIsPunishing="sprintIsPunishing"
       />
     </v-main>
   </v-app>
@@ -50,14 +51,12 @@
   const writerText = ref("")
   const sprintTimeInSeconds = ref(60*15)
   const timeElapsed = ref(0)
+  const secondsIdle = ref(0)
+  const gracePeriod = ref(2)
   const sprintIsRunning = ref(false)
   const sprintIsPaused = ref(false)
   const sprintTimer = ref(null)
-
-  // watch(doBeginSprint, beginSprint)
-  // watch(doEndSprint, endSprint)
-  // watch(doPauseSprint, pauseSprint)
-  // watch(doUnpauseSprint, unpauseSprint)
+  const sprintIsPunishing = ref(false)
 
   function beginSprint() {
     sprintIsRunning.value = true
@@ -82,31 +81,34 @@
     sprintTimer.value = setInterval(timerDidTick, 1000)
   }
 
-  // watch(writerText, writerTextChanged)
-  // watch(wordCountGoal, wordCountGoalChanged)
-  // watch(sprintTimeInSeconds, sprintTimeInSecondsChanged)
-
-  // // setInterval(timerDidTick, 1000)
-
   function timerDidTick() {
     timeElapsed.value++
+    secondsIdle.value++
+    if(secondsIdle.value > gracePeriod.value && !sprintIsPunishing.value) { sprintIsPunishing.value = true }
+  }
+
+  function resetPunishCountdown() {
+    if(sprintIsPunishing.value === true) { sprintIsPunishing.value = false }
+    secondsIdle.value = 0
   }
 
   function writerTextChanged(text) {
+    if(!sprintIsRunning.value) { beginSprint() }
+    if(text.length > writerText.value.length) {
+      resetPunishCountdown()
+    }
     const currentWordCount = text.split(" ").length - 1
-    console.log("text changed", text)
     if(currentWordCount.value !== wordsWritten.value) {
       wordsWritten.value = currentWordCount
     }
+    writerText.value = text
   }
 
   function onTimeChanged(newValue) {
-    console.log("time changed", newValue)
     sprintTimeInSeconds.value = newValue
   }
 
   function onGoalChanged(newValue) {
-    console.log("goal changed", newValue)
     wordCountGoal.value = newValue
   }
 
