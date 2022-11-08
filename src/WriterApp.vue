@@ -14,7 +14,7 @@
           v-model:wordCountGoal="wordCountGoal" 
           :wordsWritten="wordsWritten"
           @goalChanged="onGoalChanged"
-          v-model:sprintTimeInSeconds="sprintTimeInSeconds"
+          v-model:sprintLengthInSeconds="sprintLengthInSeconds"
           :timeElapsed="timeElapsed"
           :sprintIsRunning="sprintIsRunning"
           :sprintIsPaused="sprintIsPaused"
@@ -23,6 +23,11 @@
           @endSprint="endSprint"
           @pauseSprint="pauseSprint"
           @unpauseSprint="unpauseSprint"
+          v-model:consequencesAreOn="consequencesAreOn"
+          :consequencesAreOn="consequencesAreOn"
+          @toggleConsequencesAreOn="toggleConsequencesAreOn"
+          :gracePeriod="gracePeriod"
+          @gracePeriodChanged="gracePeriodChanged"
         />
 
 
@@ -49,7 +54,7 @@
   const wordCountGoal = ref(500)
   const wordsWritten = ref(0)
   const writerText = ref("")
-  const sprintTimeInSeconds = ref(60*15)
+  const sprintLengthInSeconds = ref(60*15)
   const timeElapsed = ref(0)
   const secondsIdle = ref(0)
   const gracePeriod = ref(2)
@@ -57,6 +62,7 @@
   const sprintIsPaused = ref(false)
   const sprintTimer = ref(null)
   const sprintIsPunishing = ref(false)
+  const consequencesAreOn = ref(true)
 
   function beginSprint() {
     sprintIsRunning.value = true
@@ -105,11 +111,19 @@
   }
 
   function onTimeChanged(newValue) {
-    sprintTimeInSeconds.value = newValue
+    sprintLengthInSeconds.value = newValue
   }
 
   function onGoalChanged(newValue) {
     wordCountGoal.value = newValue
+  }
+
+  function toggleConsequencesAreOn() {
+    consequencesAreOn.value = !consequencesAreOn.value
+  }
+
+  function gracePeriodChanged(newValue) {
+    gracePeriod.value = newValue
   }
 
 
