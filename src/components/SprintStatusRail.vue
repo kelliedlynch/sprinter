@@ -1,4 +1,5 @@
 <template>
+  <div>
   <v-card
     class="my-2 brandingCard"
   >
@@ -11,7 +12,7 @@
     /> -->
     <v-card-text
     >
-      <SprinterLogo 
+      <SprinterLogoTrimmed 
         :width="logoSize"
         :height="logoSize"
         :class="'ms-'+logoPos"
@@ -50,7 +51,7 @@
             step="100"
             class="align-start"
             
-            v-model="wordCountGoal"
+            v-model="wordsGoal"
           >
             <template v-slot:append>
               <v-text-field
@@ -60,7 +61,7 @@
                 hide-details
                 style="width: 6rem"
                 @change:wordCountGoal="$emit('update:wordCountGoal', $event.target.value)"
-                v-model="wordCountGoal"
+                v-model="wordsGoal"
               />
             </template>
           </v-slider>
@@ -81,7 +82,7 @@
           :size="meterSize"
           :width="meterStroke"
         >
-          {{ sprintTimeInMinutes }}
+          {{ timerString }}
         </v-progress-circular>
       </div>
     
@@ -113,14 +114,35 @@
     </div>
   </div>
   </v-card>
-
+  <div class="d-flex flex-no-wrap">
+    <v-btn 
+      :prepend-icon="'fa-solid fa-'+(props.sprintIsPaused || !props.sprintIsRunning ? 'play' : 'pause')"
+      color="primary"
+      class="mx-2"
+      rounded="pill"
+      @click="handleButtonClick"
+    >
+    {{ props.sprintIsPaused || !props.sprintIsRunning ? 'Start' : 'Pause' }}
+    </v-btn>
+    <v-btn 
+      prepend-icon="fa-solid fa-stop"
+      color="primary"
+      class="mx-2"
+      rounded="pill"
+      @click="$emit('endSprint')"
+    >
+    End Sprint
+    </v-btn>
+  </div>
+</div>
 </template>
 
 <script setup>
 // import { watch } from 'fs';
 import { defineProps, computed, defineEmits } from 'vue'
 
-import SprinterLogo from "../assets/SprinterLogo.vue"
+import SprinterLogoTrimmed from "../assets/SprinterLogoTrimmed.vue"
+import { formatTimer } from "../Utility.js"
 
 const props = defineProps({
   wordCountGoal: {
@@ -131,9 +153,36 @@ const props = defineProps({
   wordsWritten: Number,
   sprintTimeInSeconds: Number,
   timeElapsed: Number,
+  sprintIsRunning: Boolean,
+  sprintIsPaused: Boolean,
+  onBeginSprint: Function,
+  onEndSprint: Function,
+  onPauseSprint: Function,
+  onUnpauseSprint: Function,
 })
 
-const emit = defineEmits(['timeChanged'])
+const emit = defineEmits([
+  "timeChanged", 
+  "goalChanged", 
+])
+
+const wordsGoal = computed({ 
+  get() {
+    return props.wordCountGoal
+  },
+  set(newValue) {
+    emit("goalChanged", newValue)
+  } 
+
+})
+
+const timerString = computed({
+  get() {
+    const timerSeconds = props.sprintTimeInSeconds - props.timeElapsed
+    return formatTimer(timerSeconds)
+  }
+})
+
 
 const sprintTimeInMinutes = computed({
   get() {
@@ -146,8 +195,8 @@ const sprintTimeInMinutes = computed({
 })
 
 // TODO: calculate these based on breakpoints
-const meterSize = 100
-const meterStroke = 16
+const meterSize = 106
+const meterStroke = 18
 const logoSize = meterSize / 2
 const logoPos = Math.floor((((meterSize - logoSize) / 2) ) /4)
 const namePos = Math.floor(logoPos/2)
@@ -164,11 +213,15 @@ const percentWordsWritten = computed({
   }
 })
 
-const timeRemaining = computed({
-  get() {
-    return props.sprintTimeInSeconds - props.timeElapsed
+function handleButtonClick() {
+  if(props.sprintIsRunning && props.sprintIsPaused) {
+    emit("unpauseSprint")
+  } else if(props.sprintIsRunning && !props.sprintIsPaused) {
+    emit("pauseSprint")
+  } else if(!props.sprintIsRunning) {
+    emit("beginSprint")
   }
-})
+}
 
 const percentTimeElapsed = computed({
   get() {
