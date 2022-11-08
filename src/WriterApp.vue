@@ -89,8 +89,14 @@
 
   function timerDidTick() {
     timeElapsed.value++
-    secondsIdle.value++
-    if(secondsIdle.value > gracePeriod.value && !sprintIsPunishing.value) { sprintIsPunishing.value = true }
+    if(consequencesAreOn.value) {
+      secondsIdle.value++
+      if(secondsIdle.value > gracePeriod.value && !sprintIsPunishing.value) {
+        sprintIsPunishing.value = true 
+      }
+    }
+    
+    
   }
 
   function resetPunishCountdown() {
@@ -100,7 +106,7 @@
 
   function writerTextChanged(text) {
     if(!sprintIsRunning.value) { beginSprint() }
-    if(text.length > writerText.value.length) {
+    if(consequencesAreOn.value && text.length > writerText.value.length) {
       resetPunishCountdown()
     }
     const currentWordCount = text.split(" ").length - 1
