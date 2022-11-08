@@ -1,3 +1,3 @@
-export default defineConfig({
-    base: '/sprinter/'
-  });
+// export default defineConfig({
+//     base: '/sprinter/'
+//   });
