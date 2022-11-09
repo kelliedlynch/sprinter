@@ -14,8 +14,16 @@ Built by Kellie Lynch using Vue 3 and Vuetify 3.
 ## Planned Features
 
 - Audio feedback option
-- Adjust grace period before feedback starts
 - Meter showing current typing speed
 - Show/hide meters
+- Choose whether consequences continue after goal reached
 - Dark mode
 - Download sprint results as .txt
+- Post sprint results to social media
+
+## Current TODOs
+
+- Setting words or time to zero should disregard that goal for the sprint
+- Setting time to zero should start count-up timer
+- Show total words written somewhere
+- Test in more browsers

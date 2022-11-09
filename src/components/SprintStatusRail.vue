@@ -35,7 +35,7 @@
     :meterSize="meterSize"
   />
 
-  <div class="d-flex flex-no-wrap">
+  <div class="d-flex flex-no-wrap mt-4">
     <v-btn 
       :prepend-icon="'fa-solid fa-'+(props.sprintIsPaused || !props.sprintIsRunning ? 'play' : 'pause')"
       color="primary"
