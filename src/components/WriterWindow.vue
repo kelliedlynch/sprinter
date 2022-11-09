@@ -1,5 +1,11 @@
 <template>
   <div class="h-100">
+    <div class="v-overlay v-overlay--absolute justify-center pt-10 confettiOverlay">
+      <ConfettiExplosion 
+        v-if="goalWasReached"
+        :stageHeight="windowHeight" 
+      />
+    </div>
     <v-textarea
       no-resize 
       variant="solo"
@@ -8,9 +14,9 @@
         'pa-4', 'pa-md-6', 'pa-lg-10',
         props.sprintIsPunishing ? 'writerPunishing' : '']" 
       placeholder="Start writing, or use the left menu to change your sprint options."
-      :value="textAreaContent"
-      @input="didEnterKeystroke(textAreaContent, $event.target.value)"
+      v-model="writerText"
       transition="fade-transition"
+      :readonly="writerWindowIsLocked"
     >
     </v-textarea>
     <v-snackbar
@@ -24,7 +30,8 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps, computed, inject } from 'vue';
+import { ref, defineProps, computed, inject } from 'vue';
+import ConfettiExplosion from "vue-confetti-explosion";
 
 const props = defineProps({
   sprintIsRunning: Boolean,
@@ -32,8 +39,11 @@ const props = defineProps({
   goalWasReached: Boolean,
 })
 
-const textAreaContent = inject("writerText")
+const writerText = inject("writerText")
 const rewardWasShown = inject("rewardWasShown")
+const goalWasReached = inject("goalWasReached")
+const writerWindowIsLocked = inject("writerWindowIsLocked")
+const windowHeight = ref(window.innerHeight)
 
 const showReward = computed({
   get() {
@@ -44,14 +54,14 @@ const showReward = computed({
   }
 })
 
-const emit = defineEmits([
-  "writerTextChanged",
-])
+// const emit = defineEmits([
+//   "writerTextChanged",
+// ])
 
-function didEnterKeystroke(oldValue, newValue) {
-  // console.log("didEnterKeystroke", oldValue, newValue)
-  textAreaContent.value = newValue
-  emit('writerTextChanged', oldValue)
-}
+// function didEnterKeystroke(oldValue, newValue) {
+//   console.log("didEnterKeystroke", "old", oldValue, "new", newValue)
+//   writerText.value = newValue
+//   emit('writerTextChanged', oldValue)
+// }
 
 </script>

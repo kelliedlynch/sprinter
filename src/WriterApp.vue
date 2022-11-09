@@ -30,7 +30,6 @@
 
     <v-main>
       <WriterWindow 
-        @writerTextChanged="writerTextChanged"
         :sprintIsRunning="sprintIsRunning"
         @beginSprint="beginSprint"
         :sprintIsPunishing="sprintIsPunishing"
@@ -96,7 +95,7 @@
 </template>
 
 <script setup>
-  import { ref, provide } from 'vue'
+  import { ref, provide, computed, watch } from 'vue'
 
   import WriterWindow from './components/WriterWindow.vue'
   import SprintStatusRail from './components/SprintStatusRail.vue'
@@ -104,7 +103,7 @@
   const wordCountGoal = ref(10)
   const wordsWritten = ref(0)
   const writerText = ref("")
-  const sprintLengthInSeconds = ref(7)
+  const sprintLengthInSeconds = ref(60*15)
   const timeElapsed = ref(0)
   const secondsIdle = ref(0)
   const gracePeriod = ref(2)
@@ -120,19 +119,28 @@
   const rewardWasShown = ref(false)
   const endSprintStats = ref({})
 
+  const writerWindowIsLocked = computed({
+    get() {
+      return writerText.value.length > 0 && !sprintIsRunning.value
+    }
+  })
+
   provide("consequencesAreOn", consequencesAreOn)
   provide("gracePeriod", gracePeriod)
   provide("writerText", writerText)
+  provide("goalWasReached", goalWasReached)
   provide("rewardWasShown", rewardWasShown)
+  provide("writerWindowIsLocked", writerWindowIsLocked)
 
   function beginSprint() {
     beginSprintDialog.value = false
     writerText.value = ""
-    sprintIsRunning.value = true
     sprintIsPaused.value = false
-    // rewardWasShown.value = false
+    goalWasReached.value = false
+    rewardWasShown.value = false
     endSprintStats.value = {}
     startTimer()
+    sprintIsRunning.value = true
   }
   
   function endSprint() {
@@ -180,18 +188,16 @@
   }
 
   function resetPunishCountdown() {
-    // console.log("resetPunishCountdown")
     if(sprintIsPunishing.value === true) { sprintIsPunishing.value = false }
     secondsIdle.value = 0
   }
 
-  function writerTextChanged(oldValue) {
+  watch(writerText, (newText, oldText) => {
     if(!sprintIsRunning.value) { beginSprint() }
-    // console.log("consequencesAreOn", consequencesAreOn.value, "writerText length", writerText.value.length, "oldValue length", oldValue.length)
-    if(consequencesAreOn.value && writerText.value.length > oldValue.length) {
+    if(consequencesAreOn.value && newText.length > oldText.length) {
       resetPunishCountdown()
     }
-    const currentWordCount = writerText.value.split(" ").length - 1
+    const currentWordCount = newText.split(" ").length - 1
     if(currentWordCount !== wordsWritten.value) {
       wordsWritten.value = currentWordCount
       if(wordsWritten.value >= wordCountGoal.value && !goalWasReached.value) {
@@ -199,7 +205,7 @@
         sprintIsPunishing.value = false
       }
     }
-  }
+  })
 
   function onTimeChanged(newValue) {
     sprintLengthInSeconds.value = newValue

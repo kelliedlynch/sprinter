@@ -11,6 +11,7 @@
     "@vue/cli": "^5.0.8",
     "core-js": "^3.8.3",
     "vue": "^3.2.13",
+    "vue-confetti-explosion": "^1.0.1",
     "vuetify": "^3.0.0"
   },
   "devDependencies": {
