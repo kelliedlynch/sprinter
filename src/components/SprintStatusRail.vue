@@ -33,10 +33,6 @@
 
   <ConsequencesMeter
     :meterSize="meterSize"
-    :consequencesAreOn="props.consequencesAreOn"
-    @toggleConsequencesAreOn="$emit('toggleConsequencesAreOn')"
-    :gracePeriod="props.gracePeriod"
-    @gracePeriodChanged="$emit('gracePeriodChanged', $event)"
   />
 
   <div class="d-flex flex-no-wrap">
@@ -77,19 +73,15 @@ const props = defineProps({
   timeElapsed: Number,
   sprintIsRunning: Boolean,
   sprintIsPaused: Boolean,
-  consequencesAreOn: Boolean,
-  gracePeriod: Number,
 })
 
 const emit = defineEmits([
-  "beginSprint",
+  "didClickStartButton",
   "endSprint",
   "pauseSprint",
   "unpauseSprint",
   "timeChanged",
   "goalChanged",
-  "toggleConsequencesAreOn",
-  "gracePeriodChanged",
 ])
 
 // TODO: calculate these based on breakpoints
@@ -105,7 +97,7 @@ function handleButtonClick() {
   } else if(props.sprintIsRunning && !props.sprintIsPaused) {
     emit("pauseSprint")
   } else if(!props.sprintIsRunning) {
-    emit("beginSprint")
+    emit("didClickStartButton")
   }
 }
 

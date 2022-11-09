@@ -44,35 +44,13 @@
 </template>
 
 <script setup>
-import { defineProps, computed, defineEmits } from 'vue';
+  import { defineProps, inject } from 'vue';
 
-const props = defineProps({
-  meterSize: Number,
-  consequencesAreOn: Boolean,
-  gracePeriod: Number,
-})
+  const props = defineProps({
+    meterSize: Number,
+  })
 
-const emit = defineEmits([
-  'toggleConsequencesAreOn',
-  'gracePeriodChanged',
-])
-
-const consequencesAreOn = computed({
-  get() {
-    return props.consequencesAreOn
-  },
-  set() {
-    emit('toggleConsequencesAreOn')
-  }
-})
-
-const gracePeriod = computed({
-  get() {
-    return props.gracePeriod
-  },
-  set(newValue) {
-    emit("gracePeriodChanged", newValue)
-  }
-})
+  const consequencesAreOn = inject("consequencesAreOn")
+  const gracePeriod = inject("gracePeriod")
 
 </script>

@@ -19,15 +19,10 @@
           :sprintIsRunning="sprintIsRunning"
           :sprintIsPaused="sprintIsPaused"
           @timeChanged="onTimeChanged"
-          @beginSprint="beginSprint"
+          @didClickStartButton="didClickStartButton"
           @endSprint="endSprint"
           @pauseSprint="pauseSprint"
           @unpauseSprint="unpauseSprint"
-          v-model:consequencesAreOn="consequencesAreOn"
-          :consequencesAreOn="consequencesAreOn"
-          @toggleConsequencesAreOn="toggleConsequencesAreOn"
-          :gracePeriod="gracePeriod"
-          @gracePeriodChanged="gracePeriodChanged"
         />
 
 
@@ -35,26 +30,81 @@
 
     <v-main>
       <WriterWindow 
-        v-model:writerText="writerText"
         @writerTextChanged="writerTextChanged"
         :sprintIsRunning="sprintIsRunning"
         @beginSprint="beginSprint"
         :sprintIsPunishing="sprintIsPunishing"
+        :goalWasReached="goalWasReached"
       />
     </v-main>
+    <v-dialog 
+      v-model="beginSprintDialog"
+    >
+      <v-card>
+        <v-card-text>Beginning a new sprint now will erase all text currently in the editor. Do you really want to start?</v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="beginSprint"
+          >
+            Start
+          </v-btn>
+          <v-btn
+            @click="beginSprintDialog=false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card> 
+    </v-dialog>
+    <v-dialog 
+      v-model="endSprintDialog"
+    >
+      <v-card>
+        <v-card-text>Are you sure you want to end this sprint early?</v-card-text>
+        <v-card-actions>
+          <v-btn
+            color="primary"
+            @click="endSprint"
+          >
+            End
+          </v-btn>
+          <v-btn
+            @click="endSprintDialog=false"
+          >
+            Cancel
+          </v-btn>
+        </v-card-actions>
+      </v-card> 
+    </v-dialog>
+    <v-dialog 
+      v-model="sprintFinishedDialog"
+    >
+      <v-card>
+        <v-card-title>Sprint Finished!</v-card-title>
+        <v-card-text>Great job! You wrote {{ endSprintStats.wordsWritten }} words in {{ endSprintStats.minutes }} minutes.</v-card-text>
+        <v-card-actions>
+          <v-btn
+            @click="sprintFinishedDialog=false"
+          >
+            Dismiss
+          </v-btn>
+        </v-card-actions>
+      </v-card> 
+    </v-dialog>
   </v-app>
 </template>
 
 <script setup>
-  import { ref } from 'vue'
+  import { ref, provide } from 'vue'
 
   import WriterWindow from './components/WriterWindow.vue'
   import SprintStatusRail from './components/SprintStatusRail.vue'
 
-  const wordCountGoal = ref(500)
+  const wordCountGoal = ref(10)
   const wordsWritten = ref(0)
   const writerText = ref("")
-  const sprintLengthInSeconds = ref(60*15)
+  const sprintLengthInSeconds = ref(7)
   const timeElapsed = ref(0)
   const secondsIdle = ref(0)
   const gracePeriod = ref(2)
@@ -63,57 +113,92 @@
   const sprintTimer = ref(null)
   const sprintIsPunishing = ref(false)
   const consequencesAreOn = ref(true)
+  const goalWasReached = ref(false)
+  const beginSprintDialog = ref(false)
+  const endSprintDialog = ref(false)
+  const sprintFinishedDialog = ref(false)
+  const rewardWasShown = ref(false)
+  const endSprintStats = ref({})
+
+  provide("consequencesAreOn", consequencesAreOn)
+  provide("gracePeriod", gracePeriod)
+  provide("writerText", writerText)
+  provide("rewardWasShown", rewardWasShown)
 
   function beginSprint() {
+    beginSprintDialog.value = false
+    writerText.value = ""
     sprintIsRunning.value = true
     sprintIsPaused.value = false
-    sprintTimer.value = setInterval(timerDidTick, 1000)
+    // rewardWasShown.value = false
+    endSprintStats.value = {}
+    startTimer()
   }
   
   function endSprint() {
+    endSprintDialog.value = false
     sprintIsRunning.value = false
     sprintIsPaused.value = false
-    clearInterval(sprintTimer.value)
+    sprintIsPunishing.value = false
+    stopTimer()
+    endSprintStats.value.wordsWritten = wordsWritten.value
+    endSprintStats.value.minutes = Math.floor(timeElapsed.value / 60)
     timeElapsed.value = 0
+    wordsWritten.value = 0
   }
 
   function pauseSprint() {
     sprintIsPaused.value = true
-    clearInterval(sprintTimer.value)
+    stopTimer()
   }
 
   function unpauseSprint() {
     sprintIsPaused.value = false
+    startTimer()
+  }
+
+  function startTimer() {
     sprintTimer.value = setInterval(timerDidTick, 1000)
+  }
+
+  function stopTimer() {
+    clearInterval(sprintTimer.value)
   }
 
   function timerDidTick() {
     timeElapsed.value++
-    if(consequencesAreOn.value) {
+    if(timeElapsed.value === sprintLengthInSeconds.value) {
+      sprintFinishedDialog.value = true
+      endSprint()
+    }
+    if(consequencesAreOn.value && !goalWasReached.value) {
       secondsIdle.value++
       if(secondsIdle.value > gracePeriod.value && !sprintIsPunishing.value) {
         sprintIsPunishing.value = true 
       }
     }
-    
-    
   }
 
   function resetPunishCountdown() {
+    // console.log("resetPunishCountdown")
     if(sprintIsPunishing.value === true) { sprintIsPunishing.value = false }
     secondsIdle.value = 0
   }
 
-  function writerTextChanged(text) {
+  function writerTextChanged(oldValue) {
     if(!sprintIsRunning.value) { beginSprint() }
-    if(consequencesAreOn.value && text.length > writerText.value.length) {
+    // console.log("consequencesAreOn", consequencesAreOn.value, "writerText length", writerText.value.length, "oldValue length", oldValue.length)
+    if(consequencesAreOn.value && writerText.value.length > oldValue.length) {
       resetPunishCountdown()
     }
-    const currentWordCount = text.split(" ").length - 1
-    if(currentWordCount.value !== wordsWritten.value) {
+    const currentWordCount = writerText.value.split(" ").length - 1
+    if(currentWordCount !== wordsWritten.value) {
       wordsWritten.value = currentWordCount
+      if(wordsWritten.value >= wordCountGoal.value && !goalWasReached.value) {
+        goalWasReached.value = true
+        sprintIsPunishing.value = false
+      }
     }
-    writerText.value = text
   }
 
   function onTimeChanged(newValue) {
@@ -124,13 +209,12 @@
     wordCountGoal.value = newValue
   }
 
-  function toggleConsequencesAreOn() {
-    consequencesAreOn.value = !consequencesAreOn.value
+  function didClickStartButton() {
+    if(writerText.value !== "") {
+      beginSprintDialog.value = true
+    } else {
+      beginSprint()
+    }
   }
-
-  function gracePeriodChanged(newValue) {
-    gracePeriod.value = newValue
-  }
-
 
 </script>
