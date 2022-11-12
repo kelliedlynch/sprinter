@@ -9,23 +9,16 @@
       width="max-content"
       rail-width="124"
     >
-
         <SprintStatusRail 
-          v-model:wordCountGoal="wordCountGoal" 
           :wordsWritten="wordsWritten"
-          @goalChanged="onGoalChanged"
-          v-model:sprintLengthInSeconds="sprintLengthInSeconds"
           :timeElapsed="timeElapsed"
           :sprintIsRunning="sprintIsRunning"
           :sprintIsPaused="sprintIsPaused"
-          @timeChanged="onTimeChanged"
           @didClickStartButton="didClickStartButton"
           @endSprint="endSprint"
           @pauseSprint="pauseSprint"
           @unpauseSprint="unpauseSprint"
         />
-
-
     </v-navigation-drawer>
 
     <v-main>
@@ -76,17 +69,27 @@
         </v-card-actions>
       </v-card> 
     </v-dialog>
-    <v-dialog 
-      v-model="sprintFinishedDialog"
-    >
+    <v-dialog v-model="sprintFinishedDialog" >
       <v-card>
         <v-card-title>Sprint Finished!</v-card-title>
         <v-card-text>Great job! You wrote {{ endSprintStats.wordsWritten }} words in {{ endSprintStats.minutes }} minutes.</v-card-text>
         <v-card-actions>
-          <v-btn
-            @click="sprintFinishedDialog=false"
-          >
+          <v-btn @click="sprintFinishedDialog=false">
             Dismiss
+          </v-btn>
+        </v-card-actions>
+      </v-card> 
+    </v-dialog>
+    <v-dialog v-model="showLocalStorageWarning">
+      <v-card>
+        <v-card-title>Can't save data</v-card-title>
+        <v-card-text>
+          <p>It looks like your security settings are preventing Sprinter from saving your text locally. This is usually because cookies are blocked. Please enable cookies for this site if you want your browser to remember your text.</p>
+          <p>If you don't want to enable cookies, that's okay! Just be aware that if you have to close your browser or reload the page during a sprint, you will lose whatever you've written.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="showLocalStorageWarning=false">
+            I Understand
           </v-btn>
         </v-card-actions>
       </v-card> 
@@ -110,7 +113,6 @@
   const sprintIsRunning = ref(false)
   const sprintIsPaused = ref(false)
   const sprintTimer = ref(null)
-  const sprintIsPunishing = ref(false)
   const consequencesAreOn = ref(true)
   const goalWasReached = ref(false)
   const beginSprintDialog = ref(false)
@@ -119,11 +121,19 @@
   const rewardWasShown = ref(false)
   const endSprintStats = ref({})
 
-  const writerWindowIsLocked = computed({
-    get() {
-      return writerText.value.length > 0 && !sprintIsRunning.value
-    }
-  })
+  const sprintIsPunishing = computed(() => sprintIsRunning.value && consequencesAreOn.value && secondsIdle.value > gracePeriod.value)
+
+  const writerWindowIsLocked = computed(() => writerText.value.length > 0 && !sprintIsRunning.value)
+
+  let localStorageAccessible = false
+  const showLocalStorageWarning = ref(false)
+  try {
+    writerText.value = localStorage.getItem('writerText') || ""
+    localStorageAccessible = true
+  } catch (error) {
+    console.log(error.name, error.message)
+    if(error.name === "SecurityError") { showLocalStorageWarning.value = true }
+  }
 
   provide("consequencesAreOn", consequencesAreOn)
   provide("gracePeriod", gracePeriod)
@@ -131,6 +141,8 @@
   provide("goalWasReached", goalWasReached)
   provide("rewardWasShown", rewardWasShown)
   provide("writerWindowIsLocked", writerWindowIsLocked)
+  provide("wordCountGoal", wordCountGoal)
+  provide("sprintLengthInSeconds", sprintLengthInSeconds)
 
   function beginSprint() {
     beginSprintDialog.value = false
@@ -147,7 +159,6 @@
     endSprintDialog.value = false
     sprintIsRunning.value = false
     sprintIsPaused.value = false
-    sprintIsPunishing.value = false
     stopTimer()
     endSprintStats.value.wordsWritten = wordsWritten.value
     endSprintStats.value.minutes = Math.floor(timeElapsed.value / 60)
@@ -181,39 +192,23 @@
     }
     if(consequencesAreOn.value && !goalWasReached.value) {
       secondsIdle.value++
-      if(secondsIdle.value > gracePeriod.value && !sprintIsPunishing.value) {
-        sprintIsPunishing.value = true 
-      }
     }
-  }
-
-  function resetPunishCountdown() {
-    if(sprintIsPunishing.value === true) { sprintIsPunishing.value = false }
-    secondsIdle.value = 0
   }
 
   watch(writerText, (newText, oldText) => {
     if(!sprintIsRunning.value) { beginSprint() }
     if(consequencesAreOn.value && newText.length > oldText.length) {
-      resetPunishCountdown()
+      secondsIdle.value = 0
     }
+    localStorageAccessible ? localStorage.setItem('writerText', newText) : true
     const currentWordCount = newText.split(" ").length - 1
     if(currentWordCount !== wordsWritten.value) {
       wordsWritten.value = currentWordCount
       if(wordsWritten.value >= wordCountGoal.value && !goalWasReached.value) {
         goalWasReached.value = true
-        sprintIsPunishing.value = false
       }
     }
   })
-
-  function onTimeChanged(newValue) {
-    sprintLengthInSeconds.value = newValue
-  }
-
-  function onGoalChanged(newValue) {
-    wordCountGoal.value = newValue
-  }
 
   function didClickStartButton() {
     if(writerText.value !== "") {

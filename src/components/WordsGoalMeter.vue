@@ -21,9 +21,7 @@
       <div class="w-100">
         <v-card-title>Goal:</v-card-title>
         <v-card-subtitle>words to write</v-card-subtitle>
-        <v-card-text
-          
-        >
+        <v-card-text>
           <v-slider
             min="0"
             max="2000"
@@ -31,7 +29,7 @@
             show-ticks="always"
             step="100"
             class="align-start"
-            v-model="wordsGoal"
+            v-model="wordCountGoal"
           >
             <template v-slot:append>
               <v-text-field
@@ -40,7 +38,7 @@
                 variant="outlined"
                 hide-details
                 style="width: 6rem"
-                v-model="wordsGoal"
+                v-model="wordCountGoal"
               />
             </template>
           </v-slider>
@@ -51,37 +49,21 @@
 </template>
 
 <script setup>
-import { defineEmits, defineProps, computed } from 'vue';
+import { defineProps, computed, inject } from 'vue';
 
 const props = defineProps({
-  wordCountGoal: Number,
   wordsWritten: Number,
   meterSize: Number,
   meterStroke: Number,
 })
 
-const emit = defineEmits([
-  'goalChanged'
-])
+const wordCountGoal = inject("wordCountGoal")
 
-const wordsGoal = computed({ 
-  get() {
-    return props.wordCountGoal
-  },
-  set(newValue) {
-    emit("goalChanged", parseInt(newValue))
-  } 
-})
-
-const wordsRemaining = computed({
-  get() {
-    return props.wordCountGoal - props.wordsWritten
-  }
-})
+const wordsRemaining = computed(() => wordCountGoal.value - props.wordsWritten)
 
 const percentWordsWritten = computed({
   get() {
-    return (props.wordsWritten / props.wordCountGoal) *100
+    return (props.wordsWritten / wordCountGoal.value) *100
   }
 })
 </script>

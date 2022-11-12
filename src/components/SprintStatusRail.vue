@@ -16,7 +16,6 @@
   </v-card>
   
   <WordsGoalMeter 
-    :wordCountGoal="props.wordCountGoal"
     :wordsWritten="props.wordsWritten"
     :meterSize="meterSize"
     :meterStroke="meterStroke"
@@ -24,11 +23,9 @@
   />
 
   <SprintTimerMeter
-    :sprintLengthInSeconds="props.sprintLengthInSeconds"
     :timeElapsed="props.timeElapsed"
     :meterSize="meterSize"
     :meterStroke="meterStroke"
-    @timeChanged="$emit('timeChanged', $event)"
   />
 
   <ConsequencesMeter
@@ -67,9 +64,7 @@ import SprintTimerMeter from './SprintTimerMeter.vue'
 import ConsequencesMeter from './ConsequencesMeter.vue'
 
 const props = defineProps({
-  wordCountGoal: Number,
   wordsWritten: Number,
-  sprintLengthInSeconds: Number,
   timeElapsed: Number,
   sprintIsRunning: Boolean,
   sprintIsPaused: Boolean,
@@ -80,8 +75,6 @@ const emit = defineEmits([
   "endSprint",
   "pauseSprint",
   "unpauseSprint",
-  "timeChanged",
-  "goalChanged",
 ])
 
 // TODO: calculate these based on breakpoints

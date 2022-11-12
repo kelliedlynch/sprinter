@@ -22,16 +22,14 @@
       <div class="w-100">
         <v-card-title>Time: </v-card-title>
         <v-card-subtitle>length of sprint in minutes</v-card-subtitle>
-        <v-card-text
-          
-        >
+        <v-card-text>
           <v-slider
             min="0"
             max="120"
             thumb-label
             step="1"
             class="align-start"
-            v-model="sprintTimeInMinutes"
+            v-model="sprintLengthInMinutes"
           >
             <template v-slot:append>
               <v-text-field
@@ -40,7 +38,7 @@
                 variant="outlined"
                 hide-details
                 style="width: 6rem"
-                v-model="sprintTimeInMinutes"
+                v-model="sprintLengthInMinutes"
               />
             </template>
           </v-slider>
@@ -52,38 +50,35 @@
 
 <script setup>
   import { formatTimer } from "../Utility.js"
-  import { computed, defineProps, defineEmits } from "vue"
+  import { computed, defineProps, inject } from "vue"
 
   const props = defineProps({
-    sprintLengthInSeconds: Number,
     timeElapsed: Number,
     meterSize: Number,
     meterStroke: Number,
   })
 
-  const emit = defineEmits([
-    'timeChanged',
-  ])
+  const sprintLengthInSeconds = inject("sprintLengthInSeconds")
 
   const timerString = computed({
     get() {
-      const timerSeconds = props.sprintLengthInSeconds - props.timeElapsed
+      const timerSeconds = sprintLengthInSeconds.value - props.timeElapsed
       return formatTimer(timerSeconds)
     }
   })
 
-  const sprintTimeInMinutes = computed({
+  const sprintLengthInMinutes = computed({
     get() {
-      return Math.floor(props.sprintLengthInSeconds / 60)
+      return Math.floor(sprintLengthInSeconds.value / 60)
     },
     set(newValue) {
-      emit("timeChanged", newValue * 60)
+      sprintLengthInSeconds.value = newValue * 60
     }
   })
 
   const percentTimeElapsed = computed({
     get() {
-      return (props.timeElapsed / props.sprintLengthInSeconds)  *100
+      return (props.timeElapsed / sprintLengthInSeconds.value)  * 100
     }
   })
 </script>
