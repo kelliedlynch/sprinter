@@ -9,6 +9,9 @@ import * as directives from 'vuetify/directives'
 
 import '@fortawesome/fontawesome-free/css/all.css'
 import { aliases, fa } from 'vuetify/iconsets/fa'
+import '@mdi/font/css/materialdesignicons.css'
+import { mdi } from 'vuetify/iconsets/mdi'
+
 
 const vuetify = createVuetify({
     icons: {
@@ -16,6 +19,7 @@ const vuetify = createVuetify({
       aliases,
       sets: {
         fa,
+        mdi,
       },
     },
     components,
