@@ -14,7 +14,7 @@
           :timeElapsed="timeElapsed"
           :sprintIsRunning="sprintIsRunning"
           :sprintIsPaused="sprintIsPaused"
-          @didClickStartButton="didClickStartButton"
+          @did-click-start-button="didClickStartButton"
           @endSprint="endSprint"
           @pauseSprint="pauseSprint"
           @unpauseSprint="unpauseSprint"
@@ -33,7 +33,10 @@
       v-model="beginSprintDialog"
     >
       <v-card>
-        <v-card-text>Beginning a new sprint now will erase all text currently in the editor. Do you really want to start?</v-card-text>
+        <v-card-text>
+          Beginning a new sprint now will erase all text currently in the
+              editor. Do you really want to start?
+        </v-card-text>
         <v-card-actions>
           <v-btn
             color="primary"
@@ -84,17 +87,28 @@
       <v-card>
         <v-card-title>Can't save data</v-card-title>
         <v-card-text>
-          <p>It looks like your security settings are preventing Sprinter from saving your text locally. This is usually because cookies are blocked. Please enable cookies for this site if you want your browser to remember your text.</p>
-          <p>If you don't want to enable cookies, that's okay! Just be aware that if you have to close your browser or reload the page during a sprint, you will lose whatever you've written.</p>
+          <p>
+            It looks like your security settings are preventing Sprinter from saving your text locally. This is usually because cookies are blocked.
+                Please enable cookies for this site if you want your browser to remember your text.
+          </p>
+          <p>
+            If you don't want to enable cookies, that's okay! Just be aware that if you have to close your browser or reload the page during a sprint,
+                you will lose whatever you've written.
+          </p>
         </v-card-text>
         <v-card-actions>
-          <v-btn color="primary" @click="showLocalStorageWarning=false">
+          <v-btn 
+            color="primary"
+            @click="showLocalStorageWarning=false"
+          >
             I Understand
           </v-btn>
         </v-card-actions>
       </v-card> 
     </v-dialog>
+
   </v-app>
+  <DialogWrapper :transition-attrs="{name: 'dialog'}"/>
 </template>
 
 <script setup>
@@ -103,30 +117,41 @@
   import WriterWindow from './components/WriterWindow.vue'
   import SprintStatusRail from './components/SprintStatusRail.vue'
 
+  // User-changeable app defaults
   const wordCountGoal = ref(10)
+  provide("wordCountGoal", wordCountGoal)
+  const gracePeriod = ref(2)
+  provide("gracePeriod", gracePeriod)
+  const consequencesAreOn = ref(true)
+  provide("consequencesAreOn", consequencesAreOn)
+  const sprintLengthInSeconds = ref(60*15)
+  provide("sprintLengthInSeconds", sprintLengthInSeconds)
+
   const wordsWritten = ref(0)
   const writerText = ref("")
-  const sprintLengthInSeconds = ref(60*15)
+  provide("writerText", writerText)
   const timeElapsed = ref(0)
   const secondsIdle = ref(0)
-  const gracePeriod = ref(2)
   const sprintIsRunning = ref(false)
   const sprintIsPaused = ref(false)
   const sprintTimer = ref(null)
-  const consequencesAreOn = ref(true)
   const goalWasReached = ref(false)
+  provide("goalWasReached", goalWasReached)
   const beginSprintDialog = ref(false)
   const endSprintDialog = ref(false)
   const sprintFinishedDialog = ref(false)
   const rewardWasShown = ref(false)
+  provide("rewardWasShown", rewardWasShown)
   const endSprintStats = ref({})
 
   const sprintIsPunishing = computed(() => sprintIsRunning.value && consequencesAreOn.value && secondsIdle.value > gracePeriod.value)
 
   const writerWindowIsLocked = computed(() => writerText.value.length > 0 && !sprintIsRunning.value)
+  provide("writerWindowIsLocked", writerWindowIsLocked)
 
   let localStorageAccessible = false
   const showLocalStorageWarning = ref(false)
+  
   try {
     writerText.value = localStorage.getItem('writerText') || ""
     localStorageAccessible = true
@@ -134,15 +159,6 @@
     console.log(error.name, error.message)
     if(error.name === "SecurityError") { showLocalStorageWarning.value = true }
   }
-
-  provide("consequencesAreOn", consequencesAreOn)
-  provide("gracePeriod", gracePeriod)
-  provide("writerText", writerText)
-  provide("goalWasReached", goalWasReached)
-  provide("rewardWasShown", rewardWasShown)
-  provide("writerWindowIsLocked", writerWindowIsLocked)
-  provide("wordCountGoal", wordCountGoal)
-  provide("sprintLengthInSeconds", sprintLengthInSeconds)
 
   function beginSprint() {
     beginSprintDialog.value = false

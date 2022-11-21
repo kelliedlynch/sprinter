@@ -1,51 +1,44 @@
 <template>
-    <v-container fluid class="d-flex flex-column fill-height w-100">
-      <v-row
-        no-gutters
-        class="flex-grow-1 flex-shrink-0 align-self-stretch 
-          px-sm-6 px-md-8 px-lg-10 px-xl-12
-          pt-sm-6 pt-md-8 pt-lg-10 pt-xl-12
-          pb-2"
-      >
+  <v-container fluid class="d-flex flex-column fill-height w-100">
+    <v-container fluid class="d-flex flex-column fill-height w-100 pb-2">
         <v-textarea
-          no-resize
-          variant="solo"
-          :class="[
-            'writerTextArea',
-            props.sprintIsPunishing ? 'writerPunishing' : '']"
-          placeholder="Start writing, or use the left menu to change your sprint options."
-          v-model="writerText"
-          transition="fade-transition"
-          :readonly="writerWindowIsLocked"
+            no-resize
+            variant="solo"
+            :class="[
+                'writerTextArea',
+                props.sprintIsPunishing ? 'writerPunishing' : ''
+            ]"
+            placeholder="Start writing, or use the left menu to change your sprint options."
+            v-model="writerText"
+            transition="fade-transition"
+            :readonly="writerWindowIsLocked"
         >
         </v-textarea>
-      </v-row>
+      <!-- </v-row>
       <v-row 
-        no-gutters
-        class="justify-end
-          flex-grow-0 flex-shrink-1
-          px-sm-6 px-md-8 px-lg-10 px-xl-12
-          pt-2
-          pb-sm-2 pb-md-3 pb-lg-4 pb-xl-6"
-      >
-        <v-icon icon="mdi:mdi-content-copy"></v-icon>
-        <v-icon icon="mdi:mdi-file-download-outline"></v-icon>
-        <v-icon icon="mdi:mdi-close-circle-outline"></v-icon>
-      </v-row>
+          no-gutters
+          class="flex-grow-0 flex-shrink-1
+              px-sm-6 px-md-8 px-lg-10 px-xl-12
+              pt-2
+              pb-sm-2 pb-md-3 pb-lg-4 pb-xl-6"
+      > -->
+        
+      <!-- </v-row> -->
     </v-container>
-
+    <WriterDocumentMenu />
+  </v-container>
     <v-snackbar
-      v-model="showReward"
-      color="success"
-      :timeout="5000"
+        v-model="showReward"
+        color="success"
+        :timeout="5000"
     >
       Congratulations! You reached your goal!
     </v-snackbar>
 
   <div class="v-overlay v-overlay--absolute justify-center pt-10 confettiOverlay">
     <ConfettiExplosion
-        v-if="goalWasReached"
-        :stageHeight="windowHeight"
+          v-if="goalWasReached"
+          :stageHeight="windowHeight"
     />
   </div>
 </template>
@@ -53,10 +46,11 @@
 <script setup>
 import { ref, defineProps, computed, inject } from 'vue';
 import ConfettiExplosion from "vue-confetti-explosion";
+import WriterDocumentMenu from './WriterDocumentMenu.vue';
 
 const props = defineProps({
-  sprintIsRunning: Boolean,
-  sprintIsPunishing: Boolean,
+    sprintIsRunning: Boolean,
+    sprintIsPunishing: Boolean,
 })
 
 const writerText = inject("writerText")
