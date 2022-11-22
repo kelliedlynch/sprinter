@@ -64,31 +64,79 @@
     </v-sheet>
 
   </v-container>
+
   <v-snackbar
-    v-model="confirmCopied"
+    v-model="showSnackbar"
     timeout="3000"
   >
-    Text copied to clipboard.
+    {{ snackbarContents }}
   </v-snackbar>
+
+  <v-dialog 
+    v-model="dialog.show"
+    class="w-50"
+  >
+    <v-card>
+      <v-card-text>
+        {{ dialog.text }}
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          color="primary"
+          @click="dialog.action"
+        >
+          {{ "Ok"}}
+        </v-btn>
+        <v-btn
+          @click="dialog.show=false"
+        >
+          {{ "Cancel"}}
+        </v-btn>
+      </v-card-actions>
+    </v-card> 
+  </v-dialog>
 </template>
 
 <script setup>
-import { inject, ref } from 'vue';
+import { inject, ref, reactive } from 'vue';
 
-const confirmCopied = ref(false);
-const writerText = inject("writerText");
-
+const showSnackbar = ref(false);
+const snackbarContents = ref('');
+const writerText = inject('writerText');
+const dialog = reactive({
+  show: false,
+  text: ''
+})
 function copyTextToClipboard() {
   navigator.clipboard.writeText(writerText.value);
-  confirmCopied.value = true;
+  snackbarContents.value = 'Text copied to clipboard';
+  showSnackbar.value = true;
 }
 
 function downloadTextAsTxt() {
+  const dateTimeString = new Date().toISOString();
+  const formattedDateTime = dateTimeString.replace('T', ' ').slice(0, -5).replaceAll(':', '.');
+  const fileName = 'sprint ' + formattedDateTime + '.txt';
 
+  let element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(writerText.value));
+  element.setAttribute('download', fileName);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+
+  snackbarContents.value='Saved text as ' + fileName;
+  showSnackbar.value = true;
 }
 
 function clearWritingArea() {
-
+  dialog.text = 'Are you sure you want to clear the text you\'ve written?';
+  dialog.action = () => writerText.value = ''
+  dialog.show = true;
 }
 
 </script>

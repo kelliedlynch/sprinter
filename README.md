@@ -18,7 +18,6 @@ Built by Kellie Lynch using Vue 3 and Vuetify 3.
 - Show/hide meters
 - Choose whether consequences continue after goal reached
 - Dark mode
-- Download sprint results as .txt
 - Post sprint results to social media
 
 ## Current TODOs

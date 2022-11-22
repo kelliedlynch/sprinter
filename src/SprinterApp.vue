@@ -15,7 +15,7 @@
           :sprintIsRunning="sprintIsRunning"
           :sprintIsPaused="sprintIsPaused"
           @did-click-start-button="didClickStartButton"
-          @endSprint="endSprint"
+          @did-click-end-button="didClickEndButton"
           @pauseSprint="pauseSprint"
           @unpauseSprint="unpauseSprint"
         />
@@ -24,9 +24,7 @@
     <v-main>
       <WriterWindow 
         :sprintIsRunning="sprintIsRunning"
-        @beginSprint="beginSprint"
         :sprintIsPunishing="sprintIsPunishing"
-        :goalWasReached="goalWasReached"
       />
     </v-main>
     <v-dialog 
@@ -108,7 +106,6 @@
     </v-dialog>
 
   </v-app>
-  <DialogWrapper :transition-attrs="{name: 'dialog'}"/>
 </template>
 
 <script setup>
@@ -118,7 +115,7 @@
   import SprintStatusRail from './components/SprintStatusRail.vue'
 
   // User-changeable app defaults
-  const wordCountGoal = ref(10)
+  const wordCountGoal = ref(500)
   provide("wordCountGoal", wordCountGoal)
   const gracePeriod = ref(2)
   provide("gracePeriod", gracePeriod)
@@ -133,6 +130,7 @@
   const timeElapsed = ref(0)
   const secondsIdle = ref(0)
   const sprintIsRunning = ref(false)
+  provide('sprintIsRunning', sprintIsRunning)
   const sprintIsPaused = ref(false)
   const sprintTimer = ref(null)
   const goalWasReached = ref(false)
@@ -160,7 +158,7 @@
     if(error.name === "SecurityError") { showLocalStorageWarning.value = true }
   }
 
-  function beginSprint() {
+  const beginSprint = () => {
     beginSprintDialog.value = false
     writerText.value = ""
     sprintIsPaused.value = false
@@ -231,6 +229,14 @@
       beginSprintDialog.value = true
     } else {
       beginSprint()
+    }
+  }
+
+  function didClickEndButton() {
+    if(writerText.value !== "") {
+      endSprintDialog.value = true
+    } else {
+      endSprint()
     }
   }
 

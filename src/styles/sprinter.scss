@@ -1,11 +1,9 @@
+$rail-width: 124px;
+
 .writerTextArea {
     // height: 100%;
     transition: background-color 0.5s ease;
 }
-
-// .writerTextArea .v-field__input {
-//     height: 100%;
-// }
 
 .writerTextArea.v-input--horizontal {
     grid-template-rows: 100% 0%
@@ -65,4 +63,21 @@
     font-size: 1.7rem;
     line-height: 1.7rem;
     font-weight: 900;
+}
+
+.about-button-container {
+    width: $rail-width;
+}
+
+.aboutText p {
+    padding-bottom: 1rem;
+}
+
+.socialLink a {
+    text-decoration: none;
+}
+
+.sprinterLogo {
+    height: 108px;
+    width: 108px;
 }
