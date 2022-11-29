@@ -1,7 +1,6 @@
 $rail-width: 124px;
 
 .writerTextArea {
-    // height: 100%;
     transition: background-color 0.5s ease;
 }
 
@@ -21,6 +20,10 @@ $rail-width: 124px;
 .writerTextArea.writerPunishing {
     background-color: rgb(166, 47, 47);
     transition: background-color 3s ease-in;
+}
+
+.writerTextArea textarea {
+    height: 97%;
 }
 
 .settingsCard .v-input__details, .writerTextArea .v-input__details {
